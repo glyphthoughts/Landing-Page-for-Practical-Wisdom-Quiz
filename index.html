@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <!-- VT323 font preload for canvas -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=VT323:wght@400&display=swap" rel="stylesheet">
+  <title>Practical Wisdom</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background: #000;
+      font-family: "VT323", monospace;
+      overflow: hidden;
+      cursor: default;
+    }
+
+    canvas {
+      display: block;
+      background: #000;
+      cursor: pointer;
+    }
+  </style>
+</head>
+
+<body>
+  <canvas id="canvas"></canvas>
+
+  <script>
+    const canvas = document.getElementById('canvas');
+    const ctx = canvas.getContext('2d');
+
+    function drawRoundedRect(x, y, width, height, radius) {
+      ctx.beginPath();
+      ctx.moveTo(x + radius, y);
+      ctx.lineTo(x + width - radius, y);
+      ctx.quadraticCurveTo(x + width, y, x + width, y + radius);
+      ctx.lineTo(x + width, y + height - radius);
+      ctx.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
+      ctx.lineTo(x + radius, y + height);
+      ctx.quadraticCurveTo(x, y + height, x, y + height - radius);
+      ctx.lineTo(x, y + radius);
+      ctx.quadraticCurveTo(x, y, x + radius, y);
+      ctx.closePath();
+    }
+
+    function resizeCanvas() {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+      initStars();
+      draw();
+    }
+
+    window.addEventListener('resize', resizeCanvas);
+
+    let stars = [];
+    const numStars = 180;
+
+    function initStars() {
+      stars = [];
+      for (let i = 0; i < numStars; i++) {
+        stars.push({
+          x: Math.random() * canvas.width,
+          y: Math.random() * canvas.height,
+          size: 2 + Math.random() * 2.5,
+          opacity: 0.3 + Math.random() * 0.6,
+          twinkleSpeed: 2 + Math.random() * 3,
+          phase: Math.random() * Math.PI * 2
+        });
+      }
+    }
+
+    const buttons = [
+      {
+        text: "Take the quiz",
+        y: 0,
+        width: 0,
+        height: 0,
+        fontSize: 0,
+        isPrimary: true,
+        href: "quiz.html"
+      },
+      {
+        text: "GlyphThoughts Website",
+        y: 0,
+        width: 0,
+        height: 0,
+        fontSize: 0,
+        isPrimary: false,
+        href: "https://glyphthoughts.carrd.co"
+      }
+    ];
+
+    let hoveredButton = -1;
+    let time = 0;
+    let fontsLoaded = false;
+
+    function loadFonts() {
+      return new Promise((resolve) => {
+        if (document.fonts) {
+          document.fonts.load('400 20px VT323').then(() => {
+            fontsLoaded = true;
+            resolve();
+          }).catch(() => {
+            setTimeout(() => {
+              fontsLoaded = true;
+              resolve();
+            }, 2000);
+          });
+        } else {
+          setTimeout(() => {
+            fontsLoaded = true;
+            resolve();
+          }, 2000);
+        }
+      });
+    }
+
+    function drawStars() {
+      stars.forEach(star => {
+        const twinkle = 0.2 + 0.8 * (0.5 + 0.5 * Math.sin(time * 0.001 * star.twinkleSpeed + star.phase));
+        ctx.fillStyle = `rgba(255, 255, 255, ${star.opacity * twinkle})`;
+        ctx.beginPath();
+        ctx.arc(star.x, star.y, star.size * twinkle, 0, Math.PI * 2);
+        ctx.fill();
+      });
+    }
+
+    function drawText(text, x, y, fontSize, color = '#EAEAEA', align = 'center', maxWidth = null, forceLines = null) {
+      ctx.font = `${fontSize}px VT323, monospace`;
+      ctx.fillStyle = color;
+      ctx.textAlign = align;
+      ctx.textBaseline = 'middle';
+
+      if (maxWidth) {
+        const words = text.split(' ');
+        let lines = [];
+
+        if (forceLines) {
+          let targetLinesWidth = maxWidth;
+          let attempts = 0;
+
+          while (attempts < 20) {
+            lines = [];
+            let currentLine = '';
+
+            for (let word of words) {
+              const testLine = currentLine + (currentLine ? ' ' : '') + word;
+              const metrics = ctx.measureText(testLine);
+              if (metrics.width > targetLinesWidth && currentLine) {
+                lines.push(currentLine);
+                currentLine = word;
+              } else {
+                currentLine = testLine;
+              }
+            }
+            if (currentLine) lines.push(currentLine);
+
+            if (lines.length === forceLines) {
+              break;
+            } else if (lines.length > forceLines) {
+              targetLinesWidth += 20;
+            } else {
+              targetLinesWidth -= 10;
+            }
+            attempts++;
+          }
+        } else {
+          let currentLine = '';
+          for (let word of words) {
+            const testLine = currentLine + (currentLine ? ' ' : '') + word;
+            const metrics = ctx.measureText(testLine);
+            if (metrics.width > maxWidth && currentLine) {
+              lines.push(currentLine);
+              currentLine = word;
+            } else {
+              currentLine = testLine;
+            }
+          }
+          if (currentLine) lines.push(currentLine);
+        }
+
+        const lineHeight = fontSize * 1.4;
+        const startY = y - ((lines.length - 1) * lineHeight) / 2;
+        lines.forEach((line, i) => {
+          ctx.fillText(line, x, startY + i * lineHeight);
+        });
+
+        return lines.length * lineHeight;
+      } else {
+        ctx.fillText(text, x, y);
+        return fontSize;
+      }
+    }
+
+    function drawButton(button, index) {
+      const isHovered = hoveredButton === index;
+      const centerX = canvas.width / 2;
+
+      const alpha = isHovered ? 0.12 : 0.06;
+      ctx.fillStyle = `rgba(255, 255, 255, ${alpha})`;
+      ctx.strokeStyle = button.isPrimary ?
+        `rgba(255, 255, 255, 0.3)` :
+        `rgba(255, 255, 255, 0.2)`;
+      ctx.lineWidth = 1.25;
+
+      const buttonX = centerX - button.width / 2;
+      const buttonY = button.y - button.height / 2;
+
+      drawRoundedRect(buttonX, buttonY, button.width, button.height, 10);
+      ctx.fill();
+      ctx.stroke();
+
+      ctx.fillStyle = '#EAEAEA';
+      ctx.font = `${button.fontSize}px VT323, monospace`;
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(button.text, centerX, button.y);
+    }
+
+    function draw() {
+
+      ctx.fillStyle = '#000000';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      drawStars();
+
+      const centerX = canvas.width / 2;
+      const centerY = canvas.height / 2;
+
+      const titleSize = Math.min(Math.max(canvas.width * 0.08, 32), Math.max(canvas.height * 0.12, 32));
+      const subtitleSize = Math.min(Math.max(canvas.width * 0.035, 18), Math.max(canvas.height * 0.055, 18));
+      const taglineSize = Math.min(Math.max(canvas.width * 0.025, 16), Math.max(canvas.height * 0.04, 16));
+
+      const paragraphSize = Math.min(Math.max(canvas.width * 0.021, 16), Math.max(canvas.height * 0.029, 16));
+
+      const titleY = centerY - (canvas.height * 0.25);
+      const subtitleY = centerY - (canvas.height * 0.14);
+      const taglineY = centerY - (canvas.height * 0.09);
+      const paragraphY = centerY + (canvas.height * 0.04);
+
+      drawText("Practical Wisdom", centerX, titleY, titleSize, '#EAEAEA');
+      drawText("The Stoic Mindset", centerX, subtitleY, subtitleSize, '#BDBDBD');
+      drawText("'Introspection Exercise'", centerX, taglineY, taglineSize, '#BDBDBD');
+
+      const aboutText = "Ten prompt‑based questions completed in about 3–5 minutes; no grading and no leaderboards—only reflection over comparison. The language and tone are shaped by Stoic practice: restraint, judgment, purpose. On completion, an optional certificate acknowledges the identified mindset; it is not a qualification.";
+      const paragraphWidth = Math.min(canvas.width * 0.8, 1000);
+      drawText(aboutText, centerX, paragraphY, paragraphSize, '#FFFFFF', 'center', paragraphWidth, 4); // Force 4 lines
+
+      const buttonStartY = centerY + (canvas.height * 0.18);
+      const buttonSpacing = Math.max(canvas.height * 0.08, 50); // Same spacing between buttons
+
+      buttons.forEach((button, index) => {
+        button.fontSize = Math.min(Math.max(canvas.width * 0.025, 18), Math.max(canvas.height * 0.035, 18));
+        button.height = Math.max(canvas.height * 0.06, 45);
+
+        ctx.font = `${button.fontSize}px VT323, monospace`;
+        const textWidth = ctx.measureText(button.text).width;
+        button.width = textWidth + Math.max(canvas.width * 0.04, 30); // responsive padding
+        button.y = buttonStartY + index * buttonSpacing;
+
+        drawButton(button, index);
+      });
+    }
+
+    canvas.addEventListener('mousemove', (e) => {
+      const rect = canvas.getBoundingClientRect();
+      const mouseX = e.clientX - rect.left;
+      const mouseY = e.clientY - rect.top;
+
+      hoveredButton = -1;
+
+      buttons.forEach((button, index) => {
+        const centerX = canvas.width / 2;
+        const buttonX = centerX - button.width / 2;
+        const buttonY = button.y - button.height / 2;
+
+        if (mouseX >= buttonX && mouseX <= buttonX + button.width &&
+          mouseY >= buttonY && mouseY <= buttonY + button.height) {
+          hoveredButton = index;
+        }
+      });
+
+      canvas.style.cursor = hoveredButton >= 0 ? 'pointer' : 'default';
+    });
+
+    canvas.addEventListener('click', (e) => {
+      if (hoveredButton >= 0) {
+        const button = buttons[hoveredButton];
+        if (button.href.startsWith('http')) {
+          window.open(button.href, '_blank');
+        } else {
+          window.location.href = button.href;
+        }
+      }
+    });
+
+    function animate() {
+      time = Date.now();
+      draw();
+      requestAnimationFrame(animate);
+    }
+
+    loadFonts().then(() => {
+      resizeCanvas();
+      animate();
+    });
+  </script>
+</body>
+
+</html>
