@@ -2,9 +2,10 @@
 <html lang="en">
 
 
+
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=VT323:wght@400&display=swap" rel="stylesheet">
@@ -18,6 +19,14 @@
       -webkit-user-select: none;
       -moz-user-select: none;
       -ms-user-select: none;
+      -webkit-touch-callout: none;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    html {
+      font-size: 16px;
+      -webkit-text-size-adjust: 100%;
+      -ms-text-size-adjust: 100%;
     }
 
     html,
@@ -26,15 +35,17 @@
       height: 100%;
       overflow: hidden;
       touch-action: none;
+      position: fixed;
+      top: 0;
+      left: 0;
     }
 
     body {
       background: #000;
       font-family: "VT323", monospace;
       cursor: default;
-      position: fixed;
-      top: 0;
-      left: 0;
+      margin: 0;
+      padding: 0;
     }
 
     canvas {
@@ -46,9 +57,30 @@
       position: absolute;
       top: 0;
       left: 0;
+      -webkit-user-select: none;
+      -moz-user-select: none;
+      -ms-user-select: none;
+      user-select: none;
+    }
+
+    /* Enhanced mobile optimizations */
+    @media (max-width: 320px) {
+      html { font-size: 14px; }
     }
 
     @media (max-width: 480px) and (orientation: portrait) {
+      canvas {
+        width: 100vw;
+        height: 100vh;
+      }
+      html { font-size: 15px; }
+    }
+
+    @media (max-width: 768px) and (orientation: portrait) {
+      html { font-size: 15px; }
+    }
+
+    @media (max-height: 500px) and (orientation: landscape) {
       canvas {
         width: 100vw;
         height: 100vh;
@@ -61,20 +93,41 @@
         height: 100vh;
       }
     }
+
+    /* Ultra-wide screen support */
+    @media (min-width: 2560px) {
+      canvas {
+        width: 100vw;
+        height: 100vh;
+      }
+    }
+
+    /* High DPI displays */
+    @media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+      canvas {
+        image-rendering: -webkit-optimize-contrast;
+        image-rendering: crisp-edges;
+      }
+    }
   </style>
 </head>
+
 
 
 <body>
   <canvas id="canvas"></canvas>
 
 
+
   <script>
     const canvas = document.getElementById('canvas');
     const ctx = canvas.getContext('2d');
 
-    let devicePixelRatio = window.devicePixelRatio || 1;
-    let isTouch = 'ontouchstart' in window;
+    let devicePixelRatio = Math.min(window.devicePixelRatio || 1, 2); // Cap at 2 for performance
+    let isTouch = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+    let lastFrameTime = 0;
+    const targetFPS = 60;
+    const frameInterval = 1000 / targetFPS;
 
     function drawRoundedRect(x, y, width, height, radius) {
       ctx.beginPath();
@@ -95,39 +148,51 @@
       const baseHeight = Math.min(canvas.height, 1080);
       const isSmallScreen = canvas.width < 768;
       const isVerySmallScreen = canvas.width < 480;
+      const isTinyScreen = canvas.width < 320;
       const isTinyHeight = canvas.height < 600;
+      const isUltraTinyHeight = canvas.height < 500;
       const isLandscape = canvas.width > canvas.height;
       const aspectRatio = canvas.width / canvas.height;
 
+      // Enhanced scaling logic
       let scaleFactor;
-      if (isVerySmallScreen || (isTinyHeight && isLandscape)) {
-        scaleFactor = Math.min(baseWidth / 1920, baseHeight / 1080) * 0.6;
+      if (isTinyScreen || (isUltraTinyHeight && isLandscape)) {
+        scaleFactor = Math.min(baseWidth / 1920, baseHeight / 1080) * 0.5;
+      } else if (isVerySmallScreen || (isTinyHeight && isLandscape)) {
+        scaleFactor = Math.min(baseWidth / 1920, baseHeight / 1080) * 0.65;
       } else if (isSmallScreen) {
-        scaleFactor = Math.min(baseWidth / 1920, baseHeight / 1080) * 0.75;
+        scaleFactor = Math.min(baseWidth / 1920, baseHeight / 1080) * 0.8;
       } else {
         scaleFactor = Math.min(baseWidth / 1920, baseHeight / 1080);
       }
 
+      // Ultra-wide support
+      if (aspectRatio > 2.5) {
+        scaleFactor *= 0.9;
+      }
+
       return {
-        titleSize: Math.max(Math.min(80 * scaleFactor, baseWidth * 0.06), 24),
-        subtitleSize: Math.max(Math.min(42 * scaleFactor, baseWidth * 0.032), 18),
-        taglineSize: Math.max(Math.min(32 * scaleFactor, baseWidth * 0.025), 16),
-        paragraphSize: Math.max(Math.min(26 * scaleFactor, baseWidth * 0.022), 14),
-        buttonSize: Math.max(Math.min(28 * scaleFactor, baseWidth * 0.024), 16),
-        buttonHeight: Math.max(Math.min(50 * scaleFactor, baseHeight * 0.055), 40),
-        buttonPadding: Math.max(Math.min(40 * scaleFactor, baseWidth * 0.035), 20),
-        paragraphWidth: Math.min(baseWidth * 0.85, 900),
+        titleSize: Math.max(Math.min(80 * scaleFactor, baseWidth * 0.065), isTinyScreen ? 20 : 24),
+        subtitleSize: Math.max(Math.min(42 * scaleFactor, baseWidth * 0.035), isTinyScreen ? 16 : 18),
+        taglineSize: Math.max(Math.min(32 * scaleFactor, baseWidth * 0.028), isTinyScreen ? 14 : 16),
+        paragraphSize: Math.max(Math.min(26 * scaleFactor, baseWidth * 0.024), isTinyScreen ? 12 : 14),
+        buttonSize: Math.max(Math.min(28 * scaleFactor, baseWidth * 0.026), isTinyScreen ? 14 : 16),
+        buttonHeight: Math.max(Math.min(50 * scaleFactor, baseHeight * 0.06), isTinyScreen ? 35 : 40),
+        buttonPadding: Math.max(Math.min(40 * scaleFactor, baseWidth * 0.04), isTinyScreen ? 15 : 20),
+        paragraphWidth: Math.min(baseWidth * 0.9, isTinyScreen ? 280 : (isVerySmallScreen ? 350 : 900)),
         spacing: {
-          title: isVerySmallScreen ? 0.18 : (isSmallScreen ? 0.22 : 0.25),
-          subtitle: isVerySmallScreen ? 0.10 : (isSmallScreen ? 0.12 : 0.14),
-          tagline: isVerySmallScreen ? 0.06 : (isSmallScreen ? 0.075 : 0.09),
-          paragraph: isVerySmallScreen ? -0.02 : (isSmallScreen ? 0.02 : 0.04),
-          buttons: isVerySmallScreen ? 0.12 : (isSmallScreen ? 0.15 : 0.18),
-          buttonGap: Math.max(baseHeight * 0.07, 35)
+          title: isTinyScreen ? 0.15 : (isVerySmallScreen ? 0.18 : (isSmallScreen ? 0.22 : 0.25)),
+          subtitle: isTinyScreen ? 0.08 : (isVerySmallScreen ? 0.10 : (isSmallScreen ? 0.12 : 0.14)),
+          tagline: isTinyScreen ? 0.04 : (isVerySmallScreen ? 0.06 : (isSmallScreen ? 0.075 : 0.09)),
+          paragraph: isTinyScreen ? -0.04 : (isVerySmallScreen ? -0.02 : (isSmallScreen ? 0.02 : 0.04)),
+          buttons: isTinyScreen ? 0.08 : (isVerySmallScreen ? 0.12 : (isSmallScreen ? 0.15 : 0.18)),
+          buttonGap: Math.max(baseHeight * 0.08, isTinyScreen ? 30 : 35)
         },
         isSmallScreen,
         isVerySmallScreen,
+        isTinyScreen,
         isTinyHeight,
+        isUltraTinyHeight,
         scaleFactor
       };
     }
@@ -136,17 +201,22 @@
       const displayWidth = window.innerWidth;
       const displayHeight = window.innerHeight;
 
-      if (canvas.width !== displayWidth * devicePixelRatio ||
-        canvas.height !== displayHeight * devicePixelRatio) {
+      // High DPI optimization
+      const pixelRatio = Math.min(devicePixelRatio, 2);
 
-        canvas.width = displayWidth * devicePixelRatio;
-        canvas.height = displayHeight * devicePixelRatio;
+      if (canvas.width !== displayWidth || canvas.height !== displayHeight) {
+        // Set actual size in memory (scaled for DPI)
+        canvas.width = displayWidth * pixelRatio;
+        canvas.height = displayHeight * pixelRatio;
 
+        // Scale back down using CSS
         canvas.style.width = displayWidth + 'px';
         canvas.style.height = displayHeight + 'px';
 
-        ctx.scale(devicePixelRatio, devicePixelRatio);
+        // Scale the drawing context so everything draws at correct size
+        ctx.scale(pixelRatio, pixelRatio);
 
+        // Reset to logical size for calculations
         canvas.width = displayWidth;
         canvas.height = displayHeight;
       }
@@ -155,26 +225,49 @@
       draw();
     }
 
-    window.addEventListener('resize', () => {
-      setTimeout(resizeCanvas, 100);
-    });
+    // Enhanced event listeners with debouncing
+    let resizeTimeout;
+    function debouncedResize() {
+      clearTimeout(resizeTimeout);
+      resizeTimeout = setTimeout(resizeCanvas, 100);
+    }
 
+    window.addEventListener('resize', debouncedResize);
     window.addEventListener('orientationchange', () => {
       setTimeout(resizeCanvas, 300);
+    });
+
+    // Performance optimization for visibility
+    let isVisible = true;
+    document.addEventListener('visibilitychange', () => {
+      isVisible = !document.hidden;
     });
 
     let stars = [];
 
     function initStars() {
       const sizes = getResponsiveSizes();
-      const numStars = sizes.isVerySmallScreen ? 120 : (sizes.isSmallScreen ? 150 : 180);
+      let numStars;
+      
+      if (sizes.isTinyScreen) {
+        numStars = 80;
+      } else if (sizes.isVerySmallScreen) {
+        numStars = 120;
+      } else if (sizes.isSmallScreen) {
+        numStars = 150;
+      } else {
+        numStars = 180;
+      }
 
       stars = [];
       for (let i = 0; i < numStars; i++) {
+        const baseSize = sizes.isTinyScreen ? 1.2 : (sizes.isVerySmallScreen ? 1.5 : 2);
+        const sizeVariation = sizes.isTinyScreen ? 1.2 : (sizes.isVerySmallScreen ? 1.5 : 2.5);
+        
         stars.push({
           x: Math.random() * canvas.width,
           y: Math.random() * canvas.height,
-          size: (sizes.isVerySmallScreen ? 1.5 : 2) + Math.random() * (sizes.isVerySmallScreen ? 1.5 : 2.5),
+          size: baseSize + Math.random() * sizeVariation,
           opacity: 0.3 + Math.random() * 0.6,
           twinkleSpeed: 2 + Math.random() * 3,
           phase: Math.random() * Math.PI * 2
@@ -229,6 +322,8 @@
     }
 
     function drawStars() {
+      if (!isVisible) return; // Skip when tab is hidden
+      
       stars.forEach(star => {
         const twinkle = 0.2 + 0.8 * (0.5 + 0.5 * Math.sin(time * 0.001 * star.twinkleSpeed + star.phase));
         ctx.fillStyle = `rgba(255, 255, 255, ${star.opacity * twinkle})`;
@@ -250,11 +345,12 @@
 
         if (forceLines) {
           const sizes = getResponsiveSizes();
-          const targetLines = sizes.isVerySmallScreen ? Math.min(forceLines + 1, 5) : forceLines;
+          const targetLines = sizes.isTinyScreen ? Math.min(forceLines + 2, 6) : 
+                             (sizes.isVerySmallScreen ? Math.min(forceLines + 1, 5) : forceLines);
           let targetLinesWidth = maxWidth;
           let attempts = 0;
 
-          while (attempts < 25) {
+          while (attempts < 30) {
             lines = [];
             let currentLine = '';
 
@@ -273,9 +369,9 @@
             if (lines.length === targetLines) {
               break;
             } else if (lines.length > targetLines) {
-              targetLinesWidth += 15;
+              targetLinesWidth += 10;
             } else {
-              targetLinesWidth -= 10;
+              targetLinesWidth -= 8;
             }
             attempts++;
           }
@@ -294,7 +390,8 @@
           if (currentLine) lines.push(currentLine);
         }
 
-        const lineHeight = fontSize * (getResponsiveSizes().isVerySmallScreen ? 1.3 : 1.4);
+        const sizes = getResponsiveSizes();
+        const lineHeight = fontSize * (sizes.isTinyScreen ? 1.2 : (sizes.isVerySmallScreen ? 1.3 : 1.4));
         const startY = y - ((lines.length - 1) * lineHeight) / 2;
         lines.forEach((line, i) => {
           ctx.fillText(line, x, startY + i * lineHeight);
@@ -312,17 +409,20 @@
       const centerX = canvas.width / 2;
       const sizes = getResponsiveSizes();
 
-      const alpha = isHovered ? (sizes.isSmallScreen ? 0.15 : 0.12) : (sizes.isSmallScreen ? 0.08 : 0.06);
+      const alpha = isHovered ? 
+        (sizes.isTinyScreen ? 0.18 : (sizes.isSmallScreen ? 0.15 : 0.12)) : 
+        (sizes.isTinyScreen ? 0.1 : (sizes.isSmallScreen ? 0.08 : 0.06));
+        
       ctx.fillStyle = `rgba(255, 255, 255, ${alpha})`;
       ctx.strokeStyle = button.isPrimary ?
-        `rgba(255, 255, 255, ${sizes.isSmallScreen ? 0.4 : 0.3})` :
-        `rgba(255, 255, 255, ${sizes.isSmallScreen ? 0.3 : 0.2})`;
-      ctx.lineWidth = sizes.isVerySmallScreen ? 1 : 1.25;
+        `rgba(255, 255, 255, ${sizes.isTinyScreen ? 0.5 : (sizes.isSmallScreen ? 0.4 : 0.3)})` :
+        `rgba(255, 255, 255, ${sizes.isTinyScreen ? 0.4 : (sizes.isSmallScreen ? 0.3 : 0.2)})`;
+      ctx.lineWidth = sizes.isTinyScreen ? 0.8 : (sizes.isVerySmallScreen ? 1 : 1.25);
 
       const buttonX = centerX - button.width / 2;
       const buttonY = button.y - button.height / 2;
 
-      const radius = Math.min(10, button.height * 0.2);
+      const radius = Math.min(8, button.height * 0.2);
       drawRoundedRect(buttonX, buttonY, button.width, button.height, radius);
       ctx.fill();
       ctx.stroke();
@@ -335,7 +435,7 @@
     }
 
     function draw() {
-      if (!fontsLoaded) return;
+      if (!fontsLoaded || !isVisible) return;
 
       ctx.fillStyle = '#000000';
       ctx.fillRect(0, 0, canvas.width, canvas.height);
@@ -356,7 +456,7 @@
       drawText("'Introspection Exercise'", centerX, taglineY, sizes.taglineSize, '#BDBDBD');
 
       const aboutText = "Ten prompt‑based questions completed in about 3–5 minutes; no grading and no leaderboards—only reflection over comparison. The language and tone are shaped by Stoic practice: restraint, judgment, purpose. On completion, an optional certificate acknowledges the identified mindset; it is not a qualification.";
-      const targetLines = sizes.isVerySmallScreen ? 5 : 4;
+      const targetLines = sizes.isTinyScreen ? 6 : (sizes.isVerySmallScreen ? 5 : 4);
       drawText(aboutText, centerX, paragraphY, sizes.paragraphSize, '#FFFFFF', 'center', sizes.paragraphWidth, targetLines);
 
       const buttonStartY = centerY + (canvas.height * sizes.spacing.buttons);
@@ -367,7 +467,8 @@
 
         ctx.font = `${button.fontSize}px VT323, monospace`;
         const textWidth = ctx.measureText(button.text).width;
-        button.width = Math.max(textWidth + sizes.buttonPadding, canvas.width * 0.3);
+        const minWidth = sizes.isTinyScreen ? canvas.width * 0.4 : (canvas.width * 0.3);
+        button.width = Math.max(textWidth + sizes.buttonPadding, minWidth);
         button.y = buttonStartY + index * sizes.spacing.buttonGap;
 
         drawButton(button, index);
@@ -413,6 +514,7 @@
       }
     }
 
+    // Enhanced touch handling
     canvas.addEventListener('mousemove', handlePointer);
     canvas.addEventListener('click', handleClick);
 
@@ -433,22 +535,39 @@
       }, { passive: false });
     }
 
-    function animate() {
-      time = Date.now();
-      draw();
+    // Frame rate optimized animation
+    function animate(currentTime) {
+      if (!isVisible) {
+        requestAnimationFrame(animate);
+        return;
+      }
+
+      if (currentTime - lastFrameTime >= frameInterval) {
+        time = currentTime;
+        draw();
+        lastFrameTime = currentTime;
+      }
       requestAnimationFrame(animate);
     }
 
     loadFonts().then(() => {
       resizeCanvas();
-      animate();
+      animate(0);
     });
 
     window.addEventListener('load', () => {
       setTimeout(resizeCanvas, 100);
     });
+
+    // Enhanced error handling
+    window.addEventListener('error', (e) => {
+      console.error('Canvas error:', e);
+      // Fallback in case of critical error
+      document.body.innerHTML = '<div style="color: white; text-align: center; padding: 50px; font-family: VT323, monospace;">Loading Practical Wisdom...</div>';
+    });
   </script>
 </body>
+
 
 
 </html>
