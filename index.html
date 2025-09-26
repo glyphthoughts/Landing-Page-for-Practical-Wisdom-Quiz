@@ -23,8 +23,7 @@
     }
 
     :root {
-      /* Modern CSS custom properties for responsive design */
-      --base-font-size: clamp(14px, 2vw, 18px);
+      --base-font-size: clamp(12px, 1.8vw, 18px);
       --canvas-bg: #000000;
       --text-primary: #EAEAEA;
       --text-secondary: #BDBDBD;
@@ -36,7 +35,6 @@
       font-size: var(--base-font-size);
       -webkit-text-size-adjust: 100%;
       -ms-text-size-adjust: 100%;
-      /* Improved smooth scrolling */
       scroll-behavior: smooth;
     }
 
@@ -49,7 +47,6 @@
       position: fixed;
       top: 0;
       left: 0;
-      /* Enhanced for better mobile performance */
       -webkit-font-smoothing: antialiased;
       -moz-osx-font-smoothing: grayscale;
     }
@@ -60,7 +57,6 @@
       cursor: default;
       margin: 0;
       padding: 0;
-      /* GPU acceleration */
       transform: translateZ(0);
       will-change: transform;
     }
@@ -70,7 +66,6 @@
       width: 100vw;
       height: 100vh;
       overflow: hidden;
-      /* Improved containment */
       contain: layout style paint;
     }
 
@@ -87,16 +82,19 @@
       -moz-user-select: none;
       -ms-user-select: none;
       user-select: none;
-      /* Enhanced GPU acceleration */
       transform: translateZ(0);
       will-change: transform;
-      /* Better image rendering */
       image-rendering: -webkit-optimize-contrast;
       image-rendering: crisp-edges;
     }
 
-    /* Modern breakpoint system */
     @media (max-width: 320px) {
+      :root {
+        --base-font-size: 10px;
+      }
+    }
+
+    @media (max-width: 480px) {
       :root {
         --base-font-size: 12px;
       }
@@ -104,25 +102,25 @@
 
     @media (max-width: 576px) {
       :root {
-        --base-font-size: 14px;
+        --base-font-size: 13px;
       }
     }
 
     @media (max-width: 768px) {
       :root {
-        --base-font-size: 15px;
+        --base-font-size: 14px;
       }
     }
 
     @media (max-width: 1024px) {
       :root {
-        --base-font-size: 16px;
+        --base-font-size: 15px;
       }
     }
 
     @media (max-width: 1280px) {
       :root {
-        --base-font-size: 17px;
+        --base-font-size: 16px;
       }
     }
 
@@ -132,20 +130,18 @@
       }
     }
 
-    /* Enhanced mobile optimizations */
     @media (max-height: 500px) and (orientation: landscape) {
       :root {
-        --base-font-size: 13px;
+        --base-font-size: 11px;
       }
     }
 
     @media (max-height: 600px) and (orientation: landscape) {
       :root {
-        --base-font-size: 14px;
+        --base-font-size: 12px;
       }
     }
 
-    /* Loading fallback */
     .loading-fallback {
       display: none;
       position: fixed;
@@ -163,7 +159,6 @@
       display: block;
     }
 
-    /* Performance optimizations for high DPI */
     @media (-webkit-min-device-pixel-ratio: 2),
     (min-resolution: 192dpi) {
       canvas {
@@ -172,7 +167,6 @@
       }
     }
 
-    /* Container queries support (future-proofing) */
     @supports (container-type: inline-size) {
       .canvas-container {
         container-type: inline-size;
@@ -188,14 +182,13 @@
   <div class="loading-fallback">Loading Practical Wisdom...</div>
 
   <script>
-    // Modern responsive breakpoints system
     const BREAKPOINTS = {
-      xs: 320,    // Extra small mobile
-      sm: 576,    // Small mobile  
-      md: 768,    // Tablets
-      lg: 1024,   // Small desktops
-      xl: 1280,   // Large desktops
-      xxl: 1440   // Extra large screens
+      xs: 320,
+      sm: 480,
+      md: 768,
+      lg: 1024,
+      xl: 1280,
+      xxl: 1440
     };
 
     function getBreakpoint() {
@@ -208,57 +201,60 @@
       return 'xxl';
     }
 
+    function getViewportInfo() {
+      return {
+        width: window.innerWidth,
+        height: window.innerHeight,
+        ratio: window.innerWidth / window.innerHeight,
+        isPortrait: window.innerHeight > window.innerWidth,
+        isLandscape: window.innerWidth > window.innerHeight
+      };
+    }
+
     const canvas = document.getElementById('canvas');
-    // Enhanced canvas context with performance optimizations
     const ctx = canvas.getContext('2d', {
       alpha: false,
       desynchronized: true,
       powerPreference: 'high-performance'
     });
 
-    // Enhanced device detection and optimization
     let devicePixelRatio = Math.min(window.devicePixelRatio || 1, 2);
     let isTouch = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0) || (navigator.msMaxTouchPoints > 0);
     let isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
     let isHighDPI = devicePixelRatio > 1;
 
-    // Performance monitoring
     const perfStats = {
       frameCount: 0,
       lastFPSCheck: 0,
       currentFPS: 60
     };
 
-    // Animation and performance variables
     let lastFrameTime = 0;
     const targetFPS = 60;
     const frameInterval = 1000 / targetFPS;
 
-    // Animation state variables
     let animationStartTime = 0;
     let isAnimationComplete = false;
     let starsVisible = false;
 
-    // Animation durations (optimized for different devices)
     const ANIMATION_DELAYS = {
-      stars: isMobile ? 300 : 500,
-      title: isMobile ? 800 : 1000,
-      subtitle: isMobile ? 1400 : 1800,
-      tagline: isMobile ? 2000 : 2400,
-      paragraph: isMobile ? 2600 : 3200,
-      buttons: isMobile ? 3200 : 4000
+      stars: isMobile ? 200 : 500,
+      title: isMobile ? 600 : 1000,
+      subtitle: isMobile ? 1000 : 1800,
+      tagline: isMobile ? 1400 : 2400,
+      paragraph: isMobile ? 1800 : 3200,
+      buttons: isMobile ? 2400 : 4000
     };
 
     const ANIMATION_DURATIONS = {
-      stars: isMobile ? 1200 : 1500,
-      title: isMobile ? 1000 : 1200,
-      subtitle: isMobile ? 600 : 800,
-      tagline: isMobile ? 500 : 600,
-      paragraph: isMobile ? 800 : 1000,
-      buttons: isMobile ? 600 : 800
+      stars: isMobile ? 1000 : 1500,
+      title: isMobile ? 800 : 1200,
+      subtitle: isMobile ? 500 : 800,
+      tagline: isMobile ? 400 : 600,
+      paragraph: isMobile ? 600 : 1000,
+      buttons: isMobile ? 500 : 800
     };
 
-    // Enhanced easing functions
     function easeOutCubic(t) {
       return 1 - Math.pow(1 - t, 3);
     }
@@ -280,23 +276,23 @@
 
     function getTitleAnimationProgress(startTime, delay, duration) {
       const elapsed = Date.now() - startTime;
-      if (elapsed < delay) return { opacity: 0, y: -50 };
+      if (elapsed < delay) return { opacity: 0, y: -30 };
       const progress = Math.min((elapsed - delay) / duration, 1);
       const easedProgress = easeInOutCubic(progress);
       return {
         opacity: easedProgress,
-        y: -50 * (1 - easedProgress)
+        y: -30 * (1 - easedProgress)
       };
     }
 
     function getSlideUpProgress(startTime, delay, duration) {
       const elapsed = Date.now() - startTime;
-      if (elapsed < delay) return { opacity: 0, y: 30 };
+      if (elapsed < delay) return { opacity: 0, y: 20 };
       const progress = Math.min((elapsed - delay) / duration, 1);
       const easedProgress = easeOutCubic(progress);
       return {
         opacity: easedProgress,
-        y: 30 * (1 - easedProgress)
+        y: 20 * (1 - easedProgress)
       };
     }
 
@@ -314,89 +310,104 @@
       ctx.closePath();
     }
 
-    // Enhanced responsive sizing with modern breakpoint system
     function getResponsiveSizes() {
       const breakpoint = getBreakpoint();
+      const viewport = getViewportInfo();
       const baseWidth = Math.min(canvas.width, 1920);
       const baseHeight = Math.min(canvas.height, 1080);
-      const aspectRatio = canvas.width / canvas.height;
 
-      // Breakpoint-based sizing
       const sizeConfigs = {
-        xs: { scale: 0.45, minTitle: 18, minText: 11 },
-        sm: { scale: 0.6, minTitle: 22, minText: 13 },
-        md: { scale: 0.75, minTitle: 26, minText: 15 },
-        lg: { scale: 0.9, minTitle: 30, minText: 17 },
-        xl: { scale: 1.0, minTitle: 34, minText: 19 },
-        xxl: { scale: 1.1, minTitle: 38, minText: 21 }
+        xs: {
+          scale: viewport.isPortrait ? 0.35 : 0.40,
+          minTitle: 16,
+          minText: 10,
+          paragraphWidth: Math.min(viewport.width * 0.85, 260)
+        },
+        sm: {
+          scale: viewport.isPortrait ? 0.45 : 0.50,
+          minTitle: 18,
+          minText: 11,
+          paragraphWidth: Math.min(viewport.width * 0.88, 320)
+        },
+        md: {
+          scale: 0.65,
+          minTitle: 22,
+          minText: 13,
+          paragraphWidth: Math.min(viewport.width * 0.90, 500)
+        },
+        lg: {
+          scale: 0.8,
+          minTitle: 26,
+          minText: 15,
+          paragraphWidth: Math.min(viewport.width * 0.85, 700)
+        },
+        xl: {
+          scale: 0.95,
+          minTitle: 30,
+          minText: 17,
+          paragraphWidth: Math.min(viewport.width * 0.80, 900)
+        },
+        xxl: {
+          scale: 1.1,
+          minTitle: 34,
+          minText: 19,
+          paragraphWidth: Math.min(viewport.width * 0.75, 1000)
+        }
       };
 
       const config = sizeConfigs[breakpoint];
       let scaleFactor = Math.min(baseWidth / 1920, baseHeight / 1080) * config.scale;
 
-      // Ultra-wide screen adjustments
-      if (aspectRatio > 2.5) {
+      if (viewport.ratio > 2.5) {
         scaleFactor *= 0.85;
       }
 
-      // High DPI adjustments
       if (isHighDPI && !isMobile) {
         scaleFactor *= 1.05;
       }
 
+      const spacingMultiplier = viewport.isPortrait && breakpoint === 'xs' ? 0.8 : 1.0;
+
       return {
-        titleSize: Math.max(80 * scaleFactor, config.minTitle),
-        subtitleSize: Math.max(42 * scaleFactor, config.minText + 4),
-        taglineSize: Math.max(32 * scaleFactor, config.minText + 2),
-        paragraphSize: Math.max(26 * scaleFactor, config.minText),
-        buttonSize: Math.max(28 * scaleFactor, config.minText + 1),
-        buttonHeight: Math.max(50 * scaleFactor, breakpoint === 'xs' ? 32 : 38),
-        buttonPadding: Math.max(40 * scaleFactor, breakpoint === 'xs' ? 12 : 18),
-        paragraphWidth: Math.min(
-          baseWidth * 0.9,
-          breakpoint === 'xs' ? 280 :
-            breakpoint === 'sm' ? 350 :
-              breakpoint === 'md' ? 600 : 900
-        ),
+        titleSize: Math.max(Math.min(80 * scaleFactor, viewport.width * 0.12), config.minTitle),
+        subtitleSize: Math.max(Math.min(42 * scaleFactor, viewport.width * 0.08), config.minText + 3),
+        taglineSize: Math.max(Math.min(32 * scaleFactor, viewport.width * 0.065), config.minText + 1),
+        paragraphSize: Math.max(Math.min(24 * scaleFactor, viewport.width * 0.045), config.minText),
+        buttonSize: Math.max(Math.min(26 * scaleFactor, viewport.width * 0.05), config.minText),
+        buttonHeight: Math.max(40 * scaleFactor, breakpoint === 'xs' ? 28 : 35),
+        buttonPadding: Math.max(30 * scaleFactor, breakpoint === 'xs' ? 10 : 15),
+        paragraphWidth: config.paragraphWidth,
         spacing: {
-          title: breakpoint === 'xs' ? 0.12 : breakpoint === 'sm' ? 0.16 : breakpoint === 'md' ? 0.20 : 0.25,
-          subtitle: breakpoint === 'xs' ? 0.06 : breakpoint === 'sm' ? 0.08 : breakpoint === 'md' ? 0.11 : 0.14,
-          tagline: breakpoint === 'xs' ? 0.02 : breakpoint === 'sm' ? 0.04 : breakpoint === 'md' ? 0.065 : 0.09,
-          paragraph: breakpoint === 'xs' ? -0.06 : breakpoint === 'sm' ? -0.04 : breakpoint === 'md' ? 0.01 : 0.04,
-          buttons: breakpoint === 'xs' ? 0.06 : breakpoint === 'sm' ? 0.10 : breakpoint === 'md' ? 0.13 : 0.18,
-          buttonGap: Math.max(baseHeight * 0.08, breakpoint === 'xs' ? 25 : breakpoint === 'sm' ? 30 : 35)
+          title: (breakpoint === 'xs' ? 0.18 : breakpoint === 'sm' ? 0.20 : 0.25) * spacingMultiplier,
+          subtitle: (breakpoint === 'xs' ? 0.10 : breakpoint === 'sm' ? 0.12 : 0.14) * spacingMultiplier,
+          tagline: (breakpoint === 'xs' ? 0.05 : breakpoint === 'sm' ? 0.06 : 0.09) * spacingMultiplier,
+          paragraph: (breakpoint === 'xs' ? -0.08 : breakpoint === 'sm' ? -0.05 : 0.04) * spacingMultiplier,
+          buttons: (breakpoint === 'xs' ? 0.12 : breakpoint === 'sm' ? 0.15 : 0.18) * spacingMultiplier,
+          buttonGap: Math.max(baseHeight * 0.08, breakpoint === 'xs' ? 20 : 25)
         },
         breakpoint,
         scaleFactor,
+        viewport,
         isSmallScreen: breakpoint === 'xs' || breakpoint === 'sm',
-        isVerySmallScreen: breakpoint === 'xs',
-        isTinyScreen: breakpoint === 'xs',
-        isTinyHeight: baseHeight < 600,
-        isUltraTinyHeight: baseHeight < 500
+        isVerySmallScreen: breakpoint === 'xs'
       };
     }
 
-    // Enhanced canvas setup with performance optimizations
     function setupCanvas() {
       const rect = canvas.getBoundingClientRect();
-      const dpr = Math.min(devicePixelRatio, 2); // Cap at 2x for performance
+      const dpr = Math.min(devicePixelRatio, isMobile ? 1.5 : 2);
 
-      // Set canvas dimensions
       canvas.width = rect.width * dpr;
       canvas.height = rect.height * dpr;
 
-      // Set CSS dimensions
       canvas.style.width = rect.width + 'px';
       canvas.style.height = rect.height + 'px';
 
-      // Scale context to match device pixel ratio
       ctx.scale(dpr, dpr);
 
-      // Reset canvas dimensions for calculations
       canvas.width = rect.width;
       canvas.height = rect.height;
 
-      // Performance optimizations
       ctx.imageSmoothingEnabled = true;
       ctx.imageSmoothingQuality = 'high';
 
@@ -404,13 +415,12 @@
       draw();
     }
 
-    // Optimized resize handling
     let resizeTimeout;
     let lastResizeTime = 0;
 
     function debouncedResize() {
       const now = Date.now();
-      if (now - lastResizeTime < 100) return; // Throttle resize events
+      if (now - lastResizeTime < 100) return;
 
       clearTimeout(resizeTimeout);
       resizeTimeout = setTimeout(() => {
@@ -419,42 +429,37 @@
       }, 150);
     }
 
-    // Enhanced event listeners
     window.addEventListener('resize', debouncedResize, { passive: true });
     window.addEventListener('orientationchange', () => {
       setTimeout(setupCanvas, 300);
     });
 
-    // Visibility change handling for better performance
     let isVisible = true;
     document.addEventListener('visibilitychange', () => {
       isVisible = !document.hidden;
       if (isVisible) {
-        // Resume animation when page becomes visible
         lastFrameTime = 0;
       }
     }, { passive: true });
 
     let stars = [];
 
-    // Enhanced star initialization
     function initStars() {
       const sizes = getResponsiveSizes();
       const breakpoint = sizes.breakpoint;
 
-      // Adaptive star count based on device performance
       const starCounts = {
-        xs: 60,   // Minimal for performance
-        sm: 90,   // Reduced for mobile
-        md: 120,  // Moderate for tablets
-        lg: 150,  // Standard for desktop
-        xl: 180,  // Enhanced for large screens
-        xxl: 200  // Maximum for ultra-wide
+        xs: 40,
+        sm: 60,
+        md: 90,
+        lg: 120,
+        xl: 150,
+        xxl: 180
       };
 
       const numStars = starCounts[breakpoint];
-      const baseSize = breakpoint === 'xs' ? 1.0 : breakpoint === 'sm' ? 1.3 : 1.8;
-      const sizeVariation = breakpoint === 'xs' ? 1.0 : breakpoint === 'sm' ? 1.3 : 2.2;
+      const baseSize = breakpoint === 'xs' ? 0.8 : breakpoint === 'sm' ? 1.0 : 1.5;
+      const sizeVariation = breakpoint === 'xs' ? 0.8 : breakpoint === 'sm' ? 1.0 : 1.8;
 
       stars = [];
       for (let i = 0; i < numStars; i++) {
@@ -462,16 +467,15 @@
           x: Math.random() * canvas.width,
           y: Math.random() * canvas.height,
           size: baseSize + Math.random() * sizeVariation,
-          opacity: 0.2 + Math.random() * 0.7,
-          twinkleSpeed: 1.5 + Math.random() * 3.5,
+          opacity: 0.2 + Math.random() * 0.6,
+          twinkleSpeed: 1.2 + Math.random() * 2.8,
           phase: Math.random() * Math.PI * 2,
-          initialDelay: Math.random() * 800,
-          animationSpeed: 0.7 + Math.random() * 0.6
+          initialDelay: Math.random() * 600,
+          animationSpeed: 0.6 + Math.random() * 0.8
         });
       }
     }
 
-    // Enhanced button system
     const buttons = [
       {
         text: "Take the quiz",
@@ -497,20 +501,18 @@
     let time = 0;
     let fontsLoaded = false;
 
-    // Enhanced font loading with fallback
     function loadFonts() {
       return new Promise((resolve) => {
         if (!document.fonts) {
-          // Fallback for older browsers
           setTimeout(() => {
             fontsLoaded = true;
             resolve();
-          }, 1500);
+          }, 1000);
           return;
         }
 
         const fontPromises = [
-          document.fonts.load('400 20px VT323')
+          document.fonts.load('400 16px VT323')
         ];
 
         Promise.allSettled(fontPromises).then(() => {
@@ -518,24 +520,21 @@
           resolve();
         });
 
-        // Timeout fallback
         setTimeout(() => {
           if (!fontsLoaded) {
             fontsLoaded = true;
             resolve();
           }
-        }, 3000);
+        }, 2000);
       });
     }
 
-    // Optimized star drawing
     function drawStars() {
       if (!isVisible) return;
 
       const starsProgress = getAnimationProgress(animationStartTime, ANIMATION_DELAYS.stars, ANIMATION_DURATIONS.stars);
       if (starsProgress <= 0) return;
 
-      // Batch star drawing for performance
       ctx.fillStyle = 'white';
 
       stars.forEach((star) => {
@@ -543,16 +542,15 @@
         const individualProgress = getAnimationProgress(
           animationStartTime + starDelay,
           ANIMATION_DELAYS.stars,
-          ANIMATION_DURATIONS.stars * 0.8
+          ANIMATION_DURATIONS.stars * 0.7
         );
 
         if (individualProgress <= 0) return;
 
-        const twinkle = 0.15 + 0.85 * (0.5 + 0.5 * Math.sin(time * 0.001 * star.twinkleSpeed + star.phase));
+        const twinkle = 0.1 + 0.9 * (0.5 + 0.5 * Math.sin(time * 0.001 * star.twinkleSpeed + star.phase));
         const animatedOpacity = star.opacity * twinkle * individualProgress;
         const animatedSize = star.size * twinkle * individualProgress;
 
-        // Use globalAlpha for batch processing
         ctx.globalAlpha = animatedOpacity;
         ctx.beginPath();
         ctx.arc(star.x, star.y, animatedSize, 0, Math.PI * 2);
@@ -562,62 +560,43 @@
       ctx.globalAlpha = 1;
     }
 
-    // Enhanced text drawing with better performance
-    function drawAnimatedText(text, x, y, fontSize, color = '#EAEAEA', align = 'center', maxWidth = null, forceLines = null) {
+    function splitTextIntoLines(text, maxWidth, fontSize) {
+      ctx.font = `${fontSize}px VT323, monospace`;
+
+      const words = text.split(' ');
+      const lines = [];
+      let currentLine = '';
+
+      for (let i = 0; i < words.length; i++) {
+        const word = words[i];
+        const testLine = currentLine + (currentLine ? ' ' : '') + word;
+        const metrics = ctx.measureText(testLine);
+
+        if (metrics.width > maxWidth && currentLine) {
+          lines.push(currentLine.trim());
+          currentLine = word;
+        } else {
+          currentLine = testLine;
+        }
+      }
+
+      if (currentLine) {
+        lines.push(currentLine.trim());
+      }
+
+      return lines;
+    }
+
+    function drawAnimatedText(text, x, y, fontSize, color = '#EAEAEA', align = 'center', maxWidth = null) {
       ctx.font = `${fontSize}px VT323, monospace`;
       ctx.fillStyle = color;
       ctx.textAlign = align;
       ctx.textBaseline = 'middle';
 
       if (maxWidth) {
-        const words = text.split(' ');
-        let lines = [];
+        const lines = splitTextIntoLines(text, maxWidth, fontSize);
         const sizes = getResponsiveSizes();
-
-        if (forceLines) {
-          const targetLines = sizes.breakpoint === 'xs' ? Math.min(forceLines + 2, 6) :
-            sizes.breakpoint === 'sm' ? Math.min(forceLines + 1, 5) : forceLines;
-
-          let targetLinesWidth = maxWidth;
-          let attempts = 0;
-
-          while (attempts < 25) {
-            lines = [];
-            let currentLine = '';
-
-            for (let word of words) {
-              const testLine = currentLine + (currentLine ? ' ' : '') + word;
-              const metrics = ctx.measureText(testLine);
-              if (metrics.width > targetLinesWidth && currentLine) {
-                lines.push(currentLine);
-                currentLine = word;
-              } else {
-                currentLine = testLine;
-              }
-            }
-            if (currentLine) lines.push(currentLine);
-
-            if (lines.length === targetLines) break;
-            else if (lines.length > targetLines) targetLinesWidth += 8;
-            else targetLinesWidth -= 6;
-            attempts++;
-          }
-        } else {
-          let currentLine = '';
-          for (let word of words) {
-            const testLine = currentLine + (currentLine ? ' ' : '') + word;
-            const metrics = ctx.measureText(testLine);
-            if (metrics.width > maxWidth && currentLine) {
-              lines.push(currentLine);
-              currentLine = word;
-            } else {
-              currentLine = testLine;
-            }
-          }
-          if (currentLine) lines.push(currentLine);
-        }
-
-        const lineHeight = fontSize * (sizes.breakpoint === 'xs' ? 1.15 : sizes.breakpoint === 'sm' ? 1.25 : 1.35);
+        const lineHeight = fontSize * (sizes.breakpoint === 'xs' ? 1.1 : sizes.breakpoint === 'sm' ? 1.2 : 1.3);
         const startY = y - ((lines.length - 1) * lineHeight) / 2;
 
         lines.forEach((line, i) => {
@@ -632,7 +611,6 @@
       }
     }
 
-    // Enhanced button drawing
     function drawButton(button, index) {
       const isHovered = hoveredButton === index;
       const centerX = canvas.width / 2;
@@ -640,33 +618,31 @@
 
       const buttonProgress = getSlideUpProgress(
         animationStartTime,
-        ANIMATION_DELAYS.buttons + (index * 150),
+        ANIMATION_DELAYS.buttons + (index * 120),
         ANIMATION_DURATIONS.buttons
       );
       if (buttonProgress.opacity <= 0) return;
 
-      // Enhanced hover effect
-      const hoverMultiplier = isHovered ? 1.4 : 1.0;
-      const baseAlpha = sizes.breakpoint === 'xs' ? 0.08 : sizes.breakpoint === 'sm' ? 0.07 : 0.06;
+      const hoverMultiplier = isHovered ? 1.3 : 1.0;
+      const baseAlpha = sizes.breakpoint === 'xs' ? 0.06 : sizes.breakpoint === 'sm' ? 0.07 : 0.08;
       const alpha = baseAlpha * hoverMultiplier * buttonProgress.opacity;
 
       ctx.fillStyle = `rgba(255, 255, 255, ${alpha})`;
       ctx.strokeStyle = button.isPrimary ?
-        `rgba(255, 255, 255, ${0.35 * buttonProgress.opacity})` :
-        `rgba(255, 255, 255, ${0.25 * buttonProgress.opacity})`;
-      ctx.lineWidth = sizes.breakpoint === 'xs' ? 0.8 : sizes.breakpoint === 'sm' ? 1.0 : 1.2;
+        `rgba(255, 255, 255, ${0.3 * buttonProgress.opacity})` :
+        `rgba(255, 255, 255, ${0.2 * buttonProgress.opacity})`;
+      ctx.lineWidth = sizes.breakpoint === 'xs' ? 0.6 : sizes.breakpoint === 'sm' ? 0.8 : 1.0;
 
       const animatedY = button.y + buttonProgress.y;
       const buttonX = centerX - button.width / 2;
       const buttonY = animatedY - button.height / 2;
 
-      const radius = Math.min(6, button.height * 0.15);
+      const radius = Math.min(4, button.height * 0.12);
       drawRoundedRect(buttonX, buttonY, button.width, button.height, radius);
       ctx.fill();
       ctx.stroke();
 
-      // Button text with enhanced visibility
-      ctx.globalAlpha = buttonProgress.opacity * (isHovered ? 1.0 : 0.9);
+      ctx.globalAlpha = buttonProgress.opacity * (isHovered ? 1.0 : 0.85);
       ctx.fillStyle = isHovered ? '#FFFFFF' : '#EAEAEA';
       ctx.font = `${button.fontSize}px VT323, monospace`;
       ctx.textAlign = 'center';
@@ -675,14 +651,11 @@
       ctx.globalAlpha = 1;
     }
 
-    // Performance-optimized drawing function
     function draw() {
       if (!fontsLoaded || !isVisible) return;
 
-      // Performance monitoring
       const frameStart = performance.now();
 
-      // Clear canvas efficiently
       ctx.fillStyle = '#000000';
       ctx.fillRect(0, 0, canvas.width, canvas.height);
 
@@ -692,7 +665,6 @@
       const centerY = canvas.height / 2;
       const sizes = getResponsiveSizes();
 
-      // Title animation
       const titleAnim = getTitleAnimationProgress(animationStartTime, ANIMATION_DELAYS.title, ANIMATION_DURATIONS.title);
       if (titleAnim.opacity > 0) {
         const titleY = centerY - (canvas.height * sizes.spacing.title) + titleAnim.y;
@@ -701,7 +673,6 @@
         ctx.globalAlpha = 1;
       }
 
-      // Subtitle animation
       const subtitleAnim = getSlideUpProgress(animationStartTime, ANIMATION_DELAYS.subtitle, ANIMATION_DURATIONS.subtitle);
       if (subtitleAnim.opacity > 0) {
         const subtitleY = centerY - (canvas.height * sizes.spacing.subtitle) + subtitleAnim.y;
@@ -710,7 +681,6 @@
         ctx.globalAlpha = 1;
       }
 
-      // Tagline animation
       const taglineAnim = getSlideUpProgress(animationStartTime, ANIMATION_DELAYS.tagline, ANIMATION_DURATIONS.tagline);
       if (taglineAnim.opacity > 0) {
         const taglineY = centerY - (canvas.height * sizes.spacing.tagline) + taglineAnim.y;
@@ -719,18 +689,15 @@
         ctx.globalAlpha = 1;
       }
 
-      // Paragraph animation
       const paragraphAnim = getSlideUpProgress(animationStartTime, ANIMATION_DELAYS.paragraph, ANIMATION_DURATIONS.paragraph);
       if (paragraphAnim.opacity > 0) {
         const paragraphY = centerY + (canvas.height * sizes.spacing.paragraph) + paragraphAnim.y;
         ctx.globalAlpha = paragraphAnim.opacity;
-        const aboutText = "Ten prompt‑based questions completed in about 3–5 minutes; no grading and no leaderboards—only reflection over comparison. The language and tone are shaped by Stoic practice: restraint, judgment, purpose. On completion, an optional certificate acknowledges the identified mindset; it is not a qualification.";
-        const targetLines = sizes.breakpoint === 'xs' ? 7 : sizes.breakpoint === 'sm' ? 6 : sizes.breakpoint === 'md' ? 5 : 4;
-        drawAnimatedText(aboutText, centerX, paragraphY, sizes.paragraphSize, '#FFFFFF', 'center', sizes.paragraphWidth, targetLines);
+        const aboutText = "Ten prompt-based questions completed in about 3-5 minutes; no grading and no leaderboards—only reflection over comparison. The language and tone are shaped by Stoic practice: restraint, judgment, purpose. On completion, an optional certificate acknowledges the identified mindset; it is not a qualification.";
+        drawAnimatedText(aboutText, centerX, paragraphY, sizes.paragraphSize, '#FFFFFF', 'center', sizes.paragraphWidth);
         ctx.globalAlpha = 1;
       }
 
-      // Enhanced button rendering
       const buttonStartY = centerY + (canvas.height * sizes.spacing.buttons);
       buttons.forEach((button, index) => {
         button.fontSize = sizes.buttonSize;
@@ -738,22 +705,19 @@
 
         ctx.font = `${button.fontSize}px VT323, monospace`;
         const textWidth = ctx.measureText(button.text).width;
-        const minWidth = sizes.breakpoint === 'xs' ? canvas.width * 0.35 : canvas.width * 0.28;
+        const minWidth = sizes.breakpoint === 'xs' ? canvas.width * 0.6 : canvas.width * 0.4;
         button.width = Math.max(textWidth + sizes.buttonPadding, minWidth);
         button.y = buttonStartY + index * sizes.spacing.buttonGap;
 
         drawButton(button, index);
       });
 
-      // Animation completion check
-      const totalAnimationTime = ANIMATION_DELAYS.buttons + ANIMATION_DURATIONS.buttons + 300;
+      const totalAnimationTime = ANIMATION_DELAYS.buttons + ANIMATION_DURATIONS.buttons + 200;
       if (Date.now() - animationStartTime >= totalAnimationTime) {
         isAnimationComplete = true;
       }
 
-      // Performance tracking
       const frameEnd = performance.now();
-      const frameDuration = frameEnd - frameStart;
 
       perfStats.frameCount++;
       if (frameEnd - perfStats.lastFPSCheck > 1000) {
@@ -761,15 +725,12 @@
         perfStats.frameCount = 0;
         perfStats.lastFPSCheck = frameEnd;
 
-        // Adaptive performance adjustments
-        if (perfStats.currentFPS < 45 && stars.length > 60) {
-          // Reduce stars for better performance on slower devices
-          stars = stars.slice(0, Math.max(40, stars.length * 0.8));
+        if (perfStats.currentFPS < 40 && stars.length > 30) {
+          stars = stars.slice(0, Math.max(20, stars.length * 0.7));
         }
       }
     }
 
-    // Enhanced pointer handling with better touch support
     function handlePointer(e) {
       if (!isAnimationComplete) return;
 
@@ -777,7 +738,6 @@
       const scaleX = canvas.width / rect.width;
       const scaleY = canvas.height / rect.height;
 
-      // Enhanced touch/mouse position calculation
       let clientX, clientY;
       if (e.touches && e.touches.length > 0) {
         clientX = e.touches[0].clientX;
@@ -806,14 +766,12 @@
         }
       });
 
-      // Enhanced cursor management
       const newCursor = hoveredButton >= 0 ? 'pointer' : 'default';
       if (canvas.style.cursor !== newCursor) {
         canvas.style.cursor = newCursor;
       }
     }
 
-    // Enhanced click handling
     function handleClick(e) {
       if (!isAnimationComplete) return;
 
@@ -831,17 +789,14 @@
           }
         } catch (error) {
           console.warn('Navigation error:', error);
-          // Fallback navigation
           window.location.href = button.href;
         }
       }
     }
 
-    // Enhanced event listeners with better performance
     canvas.addEventListener('mousemove', handlePointer, { passive: true });
     canvas.addEventListener('click', handleClick);
 
-    // Enhanced touch support
     if (isTouch) {
       canvas.addEventListener('touchstart', (e) => {
         e.preventDefault();
@@ -857,23 +812,16 @@
         e.preventDefault();
         handleClick(e);
       }, { passive: false });
-
-      // Prevent zoom on double tap
-      canvas.addEventListener('touchend', (e) => {
-        e.preventDefault();
-      }, { passive: false });
     }
 
-    // Performance-optimized animation loop
     function animate(currentTime) {
       if (!isVisible) {
         requestAnimationFrame(animate);
         return;
       }
 
-      // Adaptive frame rate for better performance
-      const adaptiveFrameInterval = perfStats.currentFPS < 50 ?
-        frameInterval * 1.2 : frameInterval;
+      const adaptiveFrameInterval = perfStats.currentFPS < 45 ?
+        frameInterval * 1.3 : frameInterval;
 
       if (currentTime - lastFrameTime >= adaptiveFrameInterval) {
         time = currentTime;
@@ -884,20 +832,17 @@
       requestAnimationFrame(animate);
     }
 
-    // Enhanced initialization
     function initialize() {
       setupCanvas();
       animationStartTime = Date.now();
       animate(0);
     }
 
-    // Error handling and fallback
     window.addEventListener('error', (e) => {
       console.error('Canvas error:', e);
       document.body.classList.add('error');
     });
 
-    // Enhanced loading sequence
     Promise.all([
       loadFonts(),
       new Promise(resolve => {
@@ -908,16 +853,15 @@
         }
       })
     ]).then(() => {
-      setTimeout(initialize, 100);
+      setTimeout(initialize, 50);
     }).catch(error => {
       console.error('Initialization error:', error);
       document.body.classList.add('error');
     });
 
-    // Performance monitoring (development)
     if (location.hostname === 'localhost' || location.hostname === '127.0.0.1') {
       setInterval(() => {
-        console.log(`FPS: ${perfStats.currentFPS}, Stars: ${stars.length}`);
+        console.log(`FPS: ${perfStats.currentFPS}, Stars: ${stars.length}, Viewport: ${getViewportInfo().width}x${getViewportInfo().height}`);
       }, 5000);
     }
   </script>
